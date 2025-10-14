@@ -58,4 +58,14 @@ public class DepartmentController {
                         .build());
     }
 
+    @PreAuthorize("hasRole('STAFF')")
+    @PatchMapping(path = "/staff/departments/{code}")
+    public ResponseEntity<WebResponse<String>> delete(@PathVariable String code) {
+        return ResponseEntity.ok(
+                WebResponse.<String>builder()
+                        .message("Jurusan berhasil dihapus")
+                        .build());
+        
+    }
+
 }

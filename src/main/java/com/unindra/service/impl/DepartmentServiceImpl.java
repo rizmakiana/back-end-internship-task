@@ -61,13 +61,13 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         // check if new department name already used
         if (repository.existsByNameAndIdNot(request.getDepartmentName(), department.getId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     String.format("Jurusan '%s' sudah ada", request.getDepartmentName()));
         }
 
-        // check new department code already used
+        // check if new department code already used
         if (repository.existsByCodeAndIdNot(request.getCode(), department.getId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     String.format("Kode jurusan '%s' sudah digunakan", request.getCode()));
         }
 
@@ -80,8 +80,17 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public void delete(String code) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
+
+        Department department = repository.findByCode(code)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Jurusan tidak ditemukan"));
+
+        // check if department has classroom
+        if (!department.getClassrooms().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Tidak dapat dihapus karena jurusan memiliki kelas aktif");
+        }
+
+        repository.delete(department);
     }
 
     public DepartmentResponse getDepartmentResponse(Department department) {
