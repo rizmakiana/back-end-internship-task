@@ -7,7 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.unindra.entity.Classroom;
 import com.unindra.entity.Department;
+import com.unindra.entity.Section;
 import com.unindra.model.request.DepartmentRequest;
 import com.unindra.model.response.DepartmentResponse;
 import com.unindra.repository.DepartmentRepository;
@@ -74,6 +76,21 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         department.setCode(request.getCode());
         department.setName(request.getDepartmentName());
+
+        if (!department.getClassrooms().isEmpty()) {
+            for (Classroom classroom : department.getClassrooms()) {
+                String newClassroomCode = request.getCode() + classroom.getGradeLevel();
+                classroom.setCode(newClassroomCode);
+
+                if (!classroom.getSections().isEmpty()) {
+                    for (Section section : classroom.getSections()) {
+                        String newSectionCode = newClassroomCode + " " + section.getName();
+                        section.setCode(newSectionCode);
+                    }
+                }
+            }
+
+        }
 
         Department updated = repository.save(department);
         return getDepartmentResponse(updated);
