@@ -59,8 +59,14 @@ public class ClassroomServiceImpl implements ClassroomService {
 
     @Override
     public void delete(String code) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
+        Classroom classroom = repository.findByCode(code)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tingkat kelas tidak ditemukan"));
+
+        if (!classroom.getSections().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tidak dapat dihapus karena tingkat kelas memiliki kelas aktif");
+        }
+
+        repository.delete(classroom);
     }
 
     public ClassroomResponse getClassroomResponse(Classroom classroom) {
