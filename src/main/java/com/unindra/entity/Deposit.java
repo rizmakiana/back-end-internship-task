@@ -1,7 +1,9 @@
-package com.unindra.enitity;
+package com.unindra.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import com.unindra.model.util.TransactionType;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,9 +22,9 @@ import lombok.Setter;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "payments")
-public class Payment {
-    
+@Table(name = "deposits")
+public class Deposit {
+
     @Id @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
@@ -30,7 +32,9 @@ public class Payment {
 
     private LocalDateTime date;
 
-    private BigDecimal total;
+    private BigDecimal amount;
+
+    private TransactionType transactionType;
 
     @ManyToOne
     @JoinColumn(name = "student_id")

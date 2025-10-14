@@ -1,6 +1,7 @@
-package com.unindra.enitity;
+package com.unindra.entity;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,18 +20,20 @@ import lombok.Setter;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "payment_details")
-public class PaymentDetail {
+@Table(name = "payments")
+public class Payment {
     
     @Id @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    private String name;
+    private String referenceNumber;
 
-    private BigDecimal unitPrice;
+    private LocalDateTime date;
+
+    private BigDecimal total;
 
     @ManyToOne
-    @JoinColumn(name = "payment_category_id")
-    private PaymentCategory paymentCategory;
+    @JoinColumn(name = "student_id")
+    private Student student;
 
 }

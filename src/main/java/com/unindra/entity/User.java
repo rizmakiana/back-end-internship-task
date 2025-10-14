@@ -1,4 +1,4 @@
-package com.unindra.enitity;
+package com.unindra.entity;
 
 import java.time.LocalDate;
 
