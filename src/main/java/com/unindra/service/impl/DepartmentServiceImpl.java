@@ -54,8 +54,28 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public DepartmentResponse update(String code, DepartmentRequest request) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+        validationService.validate(request);
+
+        Department department = repository.findByCode(code)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Jurusan tidak ditemukan"));
+
+        // check if new department name already used
+        if (repository.existsByNameAndIdNot(request.getDepartmentName(), department.getId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    String.format("Jurusan '%s' sudah ada", request.getDepartmentName()));
+        }
+
+        // check new department code already used
+        if (repository.existsByCodeAndIdNot(request.getCode(), department.getId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    String.format("Kode jurusan '%s' sudah digunakan", request.getCode()));
+        }
+
+        department.setCode(request.getCode());
+        department.setName(request.getDepartmentName());
+
+        Department updated = repository.save(department);
+        return getDepartmentResponse(updated);
     }
 
     @Override

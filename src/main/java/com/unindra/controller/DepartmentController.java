@@ -15,6 +15,8 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -43,6 +45,17 @@ public class DepartmentController {
                         .data(service.getAll())
                         .build());
     }
-    
+
+    @PreAuthorize("hasRole('STAFF')")
+    @PatchMapping(path = "/staff/departments/{code}")
+    public ResponseEntity<WebResponse<DepartmentResponse>> update(
+            @PathVariable String code,
+            @RequestBody DepartmentRequest request) {
+        return ResponseEntity.ok(
+                WebResponse.<DepartmentResponse>builder()
+                        .data(service.add(request))
+                        .message("Jurusan berhasil diedit")
+                        .build());
+    }
 
 }
