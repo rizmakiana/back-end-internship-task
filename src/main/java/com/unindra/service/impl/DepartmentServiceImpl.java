@@ -1,6 +1,7 @@
 package com.unindra.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -99,5 +100,10 @@ public class DepartmentServiceImpl implements DepartmentService {
                 .code(department.getCode())
                 .totalClassroom(department.getClassrooms().size())
                 .build();
+    }
+
+    @Override
+    public Optional<Department> findByDepartmentName(String name) {
+        return repository.findByName(name);
     }
 }

@@ -18,5 +18,7 @@ public interface DepartmentRepository extends JpaRepository<Department, String>{
     boolean existsByNameAndIdNot(String name, String id);
     
     boolean existsByCodeAndIdNot(String code, String id);
+
+    Optional<Department> findByName(String name);
     
 }
