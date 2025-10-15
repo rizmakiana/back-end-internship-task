@@ -9,10 +9,12 @@ public interface StudentService {
     
     StudentResponse add(StudentRequest request);
 
+    StudentResponse getByStudentId(String studentId);
+
     List<StudentResponse> getAll();
 
     StudentResponse update(String studentId, StudentRequest request);
 
     void delete(String studentId);
-    
+
 }
