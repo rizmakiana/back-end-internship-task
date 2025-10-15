@@ -63,8 +63,28 @@ public class SectionServiceImpl implements SectionService {
 
     @Override
     public SectionResponse update(String code, SectionUpdateRequest request) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+        validationService.validate(request);
+
+        Section section = repository.findByCode(code)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kelas tidak ditemukan"));
+
+        Classroom classroom = section.getClassroom();
+
+        repository.findByClassroomAndCode(classroom, code).ifPresent(existing -> {
+            if (!existing.getId().equals(section.getId())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                "Nama kelas sudah ada");
+            }
+        });
+
+        String oldCode = section.getCode();
+        String prefix = oldCode.substring(0, oldCode.lastIndexOf(" "));
+        String name = prefix + " " + request.getName();
+
+        section.setName(request.getName().charAt(0));
+        section.setCode(name);
+
+        return getSectionResponse(repository.save(section));
     }
 
     @Override
