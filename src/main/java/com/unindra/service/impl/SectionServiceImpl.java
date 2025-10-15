@@ -2,14 +2,22 @@ package com.unindra.service.impl;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.unindra.entity.Classroom;
+import com.unindra.entity.Department;
 import com.unindra.entity.Section;
 import com.unindra.model.request.SectionRequest;
 import com.unindra.model.request.SectionUpdateRequest;
 import com.unindra.model.response.SectionResponse;
 import com.unindra.repository.SectionRepository;
+import com.unindra.service.ClassroomService;
+import com.unindra.service.DepartmentService;
 import com.unindra.service.SectionService;
+import com.unindra.service.ValidationService;
 
 import lombok.AllArgsConstructor;
 
@@ -19,10 +27,31 @@ public class SectionServiceImpl implements SectionService {
 
     private final SectionRepository repository;
 
+    private final ValidationService validationService;
+
+    private final DepartmentService departmentService;
+
+    private final ClassroomService classroomService;
+
     @Override
     public SectionResponse add(SectionRequest request) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'add'");
+        validationService.validate(request);
+
+        Department department = departmentService.findByDepartmentName(request.getDepartmentName())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                "Jurusan tidak ditemukan"));
+
+        Classroom classroom = classroomService.findByDepartmentAndName(department, request.getGradeLevel())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                "Tingkat kelas tidak ditemukan"));
+
+        Character name = getSectionNameList(classroom);
+        Section section = new Section();
+        section.setClassroom(classroom);
+        section.setName(name);
+        section.setCode(String.format("%s %s", classroom.getCode(), name));
+
+        return getSectionResponse(repository.save(section));
     }
 
     @Override
@@ -52,6 +81,22 @@ public class SectionServiceImpl implements SectionService {
                 .name(section.getName())
                 .totalStudents(section.getStudents().size())
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public Character getSectionNameList(Classroom classroom) {
+        char last = 'A' - 1; // supaya kalau belum ada section, hasilnya 'A'
+        for (Section section : classroom.getSections()) {
+            if (section.getName() > last) {
+                last = section.getName();
+            }
+        }
+        if (last == 'Z') {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            "Sudah mencapai maksimum jumlah kelas");
+        }
+
+        return (char) (last + 1); // next huruf
     }
 
 }

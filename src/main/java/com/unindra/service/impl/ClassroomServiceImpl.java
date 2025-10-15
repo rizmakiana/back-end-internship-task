@@ -1,6 +1,7 @@
 package com.unindra.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -76,5 +77,10 @@ public class ClassroomServiceImpl implements ClassroomService {
                 .gradeLevel(classroom.getGradeLevel())
                 .totalSection(classroom.getSections().size())
                 .build();
+    }
+
+    @Override
+    public Optional<Classroom> findByDepartmentAndName(Department department, String classroomGrade) {
+        return repository.findByDepartmentAndGradeLevel(department, classroomGrade);
     }
 }

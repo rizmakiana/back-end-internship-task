@@ -13,7 +13,7 @@ public class SectionResponse {
 
     private String gradeLevel;
 
-    private String name;
+    private Character name;
 
     private Integer totalStudents;
 
