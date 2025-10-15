@@ -89,8 +89,14 @@ public class SectionServiceImpl implements SectionService {
 
     @Override
     public void delete(String code) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
+        Section section = repository.findByCode(code)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kelas tidak ditemukan"));
+
+        if (!section.getStudents().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kelas tidak dapat dihapus karena kelas memilki siswa aktif");
+        }
+
+        repository.delete(section);
     }
 
     public SectionResponse getSectionResponse(Section section) {
