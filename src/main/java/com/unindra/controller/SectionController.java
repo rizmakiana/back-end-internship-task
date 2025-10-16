@@ -25,44 +25,47 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping(path = "/api")
 public class SectionController {
-    
+
     private final SectionService service;
 
     @PreAuthorize("hasRole('STAFF')")
     @GetMapping(path = "/staff/sections")
     public ResponseEntity<WebResponse<List<SectionResponse>>> getAll() {
         return ResponseEntity.ok(
-            WebResponse.<List<SectionResponse>>builder()
-                .data(service.getAll())
-                .build()
-        );
+                WebResponse.<List<SectionResponse>>builder()
+                        .data(service.getAll())
+                        .build());
     }
 
     @PreAuthorize("hasRole('STAFF')")
     @PostMapping(path = "/staff/sections")
     public ResponseEntity<WebResponse<SectionResponse>> add(@RequestBody SectionRequest request) {
         return ResponseEntity.ok(
-            WebResponse.<SectionResponse>builder()
-            .data(service.add(request))
-            .message("Kelas berhasil ditambah")
-            .build()
-        );
+                WebResponse.<SectionResponse>builder()
+                        .data(service.add(request))
+                        .message("Kelas berhasil ditambah")
+                        .build());
     }
 
-	@PreAuthorize("hasRole('STAFF')")
+    @PreAuthorize("hasRole('STAFF')")
     @PatchMapping(path = "/staff/sections/{code}")
-	public ResponseEntity<WebResponse<SectionResponse>> update(@PathVariable String code, @RequestBody SectionUpdateRequest request) {
-		return ResponseEntity.ok(
-            WebResponse.<SectionResponse>builder()
-            .data(service.update(code, request))
-            .message("Kelas berhasil ditambah")
-            .build()
-        );	
-	}
+    public ResponseEntity<WebResponse<SectionResponse>> update(@PathVariable String code,
+            @RequestBody SectionUpdateRequest request) {
+        return ResponseEntity.ok(
+                WebResponse.<SectionResponse>builder()
+                        .data(service.update(code, request))
+                        .message("Kelas berhasil ditambah")
+                        .build());
+    }
 
-	@PreAuthorize("hasRole('STAFF')")
+    @PreAuthorize("hasRole('STAFF')")
     @DeleteMapping(path = "/staff/sections/{code}")
-	public void delete(@PathVariable String code) {
-		service.delete(code);
-	}
+    public ResponseEntity<WebResponse<SectionResponse>> delete(@PathVariable String code) {
+        service.delete(code);
+        return ResponseEntity.ok(
+                WebResponse.<SectionResponse>builder()
+                        .message("Kelas berhasil dihapus")
+                        .build());
+
+    }
 }

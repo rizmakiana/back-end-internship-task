@@ -49,6 +49,7 @@ public class ClassroomController {
     @PreAuthorize("hasRole('STAFF')")
     @PostMapping(path = "staff/classrooms/{code}")
     public ResponseEntity<WebResponse<String>> delete(@PathVariable String code) {
+        service.delete(code);
         return ResponseEntity.ok(
                 WebResponse.<String>builder()
                         .message("Tingkat kelas berhasil dihapus")

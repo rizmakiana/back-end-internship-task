@@ -61,6 +61,7 @@ public class DepartmentController {
     @PreAuthorize("hasRole('STAFF')")
     @PatchMapping(path = "/staff/departments/{code}")
     public ResponseEntity<WebResponse<String>> delete(@PathVariable String code) {
+        service.delete(code);
         return ResponseEntity.ok(
                 WebResponse.<String>builder()
                         .message("Jurusan berhasil dihapus")

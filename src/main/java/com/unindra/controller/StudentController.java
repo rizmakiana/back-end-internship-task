@@ -57,6 +57,7 @@ public class StudentController {
     @PreAuthorize("hasRole('STAFF')")
     @GetMapping(path = "/staff/students/{studentId}")
     public ResponseEntity<WebResponse<String>> delete(@PathVariable String id) {
+        service.delete(id);
         return ResponseEntity.ok(
                 WebResponse.<String>builder()
                         .message("Siswa berhasil dihapus")
