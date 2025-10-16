@@ -21,4 +21,8 @@ public interface StudentRepository extends JpaRepository<Student, String>{
     @Query(value = "SELECT MAX(CAST(student_id AS UNSIGNED)) FROM students", nativeQuery = true)
     Optional<String> findMaxStudentId();
 
+    boolean existsByUsernameAndIdNot(String username, String id);
+    boolean existsByEmailAndIdNot(String email, String id);
+    boolean existsByPhoneNumberAndIdNot(String phoneNumber, String id);
+
 }

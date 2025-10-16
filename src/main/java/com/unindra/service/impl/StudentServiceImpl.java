@@ -18,9 +18,11 @@ import com.unindra.entity.Regency;
 import com.unindra.entity.Section;
 import com.unindra.entity.Student;
 import com.unindra.model.request.StudentRequest;
+import com.unindra.model.request.StudentUpdate;
 import com.unindra.model.response.StudentResponse;
 import com.unindra.model.util.Role;
 import com.unindra.repository.StudentRepository;
+import com.unindra.service.ClassroomService;
 import com.unindra.service.DepartmentService;
 import com.unindra.service.DistrictService;
 import com.unindra.service.RegencyService;
@@ -45,6 +47,8 @@ public class StudentServiceImpl implements StudentService {
     private final DepartmentService departmentService;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final ClassroomService classroomService;
 
     @Override
     public StudentResponse add(StudentRequest request) {
@@ -117,9 +121,69 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public StudentResponse update(String studentId, StudentRequest request) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+    public StudentResponse update(String studentId, StudentUpdate request) {
+        Student student = repository.findByStudentId(studentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Data siswa tidak ditemukan"));
+
+        validationService.validate(request);
+
+        LocalDate birthDate;
+        try {
+            birthDate = LocalDate.of(
+                    Integer.parseInt(request.getBirthYear()),
+                    request.getBirthMonth(),
+                    Integer.parseInt(request.getBirthDate()));
+        } catch (DateTimeException | NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid.date");
+        }
+
+        Regency regency = regencyService.findById(request.getBirthPlaceRegency())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "regency.notfound"));
+
+        District district = districtService.findById(request.getDistrictAddress())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "district.notfound"));
+
+        if (repository.existsByUsernameAndIdNot(request.getUsername(), student.getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nama pengguna telah digunakan");
+        }
+
+        if (repository.existsByEmailAndIdNot(request.getEmail(), student.getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email telah digunakan");
+        }
+
+        if (repository.existsByPhoneNumberAndIdNot(request.getPhoneNumber(), student.getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No. telepon telah digunakan");
+        }
+
+        Department department = departmentService.findByDepartmentName(request.getDepartmentName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Jurusan tidak ditemukan"));
+
+        Classroom classroom = classroomService.findByDepartmentAndName(department, request.getGradeLevel())
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tingkat kelas tidak ditemukan"));
+
+        Section section = classroom.getSections().stream()
+                .filter(s -> s.getName().equals(String.valueOf(request.getSection())))
+                        .findFirst()
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                "Tidak ada kelas ditemukan"));
+
+        student.setStudentId(generateNextStudentId());
+        student.setName(request.getName());
+        student.setGender(request.getGender());
+        student.setBirthplace(regency);
+        student.setBirthDate(birthDate);
+        student.setDistrictAddress(district);
+        student.setAddress(request.getAddress());
+        student.setUsername(request.getUsername());
+        student.setPassword(passwordEncoder.encode(birthDate.format(TimeFormat.formatter)));
+        student.setEmail(request.getEmail());
+        student.setPhoneNumber(request.getPhoneNumber());
+        student.setSection(section);
+        student.setRole(Role.STUDENT);
+
+        return getStudentTableData(repository.save(student));
     }
 
     @Override

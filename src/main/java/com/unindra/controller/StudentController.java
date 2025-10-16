@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unindra.model.request.StudentRequest;
+import com.unindra.model.request.StudentUpdate;
 import com.unindra.model.response.StudentResponse;
 import com.unindra.model.response.WebResponse;
 import com.unindra.service.StudentService;
@@ -45,8 +46,8 @@ public class StudentController {
 
     @PreAuthorize("hasRole('STAFF')")
     @PostMapping(path = "/staff/students")
-    public void add(@RequestBody StudentRequest request) {
-        ResponseEntity.ok(
+    public ResponseEntity<WebResponse<StudentResponse>> add(@RequestBody StudentRequest request) {
+        return ResponseEntity.ok(
                 WebResponse.<StudentResponse>builder()
                         .data(service.add(request))
                         .message("Registrasi siswa sukses")
@@ -55,10 +56,20 @@ public class StudentController {
 
     @PreAuthorize("hasRole('STAFF')")
     @GetMapping(path = "/staff/students/{studentId}")
-    public void delete(@PathVariable String id) {
-        ResponseEntity.ok(
-                WebResponse.<StudentResponse>builder()
+    public ResponseEntity<WebResponse<String>> delete(@PathVariable String id) {
+        return ResponseEntity.ok(
+                WebResponse.<String>builder()
                         .message("Siswa berhasil dihapus")
+                        .build());
+    }
+
+    @PreAuthorize("hasRole('STAFF')")
+    @GetMapping(path = "/staff/students/{studentId}")
+    public ResponseEntity<WebResponse<StudentResponse>> update(@PathVariable String id, @RequestBody StudentUpdate update) {
+        return ResponseEntity.ok(
+                WebResponse.<StudentResponse>builder()
+                        .data(service.update(id, update))
+                        .message("Siswa berhasil diedit")
                         .build());
     }
 
