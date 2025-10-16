@@ -46,6 +46,8 @@ public class PaymentCategoryServiceImpl implements PaymentCategoryService {
 
     @Override
     public PaymentCategoryResponse update(String name, PaymentCategoryRequest request) {
+        validationService.validate(request);
+        
         PaymentCategory category = repository.findByName(name)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Kategori pembayaran tidak ditemukan"));
@@ -62,8 +64,17 @@ public class PaymentCategoryServiceImpl implements PaymentCategoryService {
 
     @Override
     public void delete(String name) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
+        
+        PaymentCategory category = repository.findByName(name)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Kategori pembayaran tidak ditemukan"));
+        
+        if (!category.getPaymentDetails().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Tidak dapat menghapus karena masih memiliki beberapa pembayaran");
+        }
+
+        repository.delete(category);
     }
 
     private PaymentCategoryResponse getPaymentCategoryResponse(PaymentCategory category) {

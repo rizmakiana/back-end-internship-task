@@ -47,11 +47,23 @@ public class PaymentCategoryController {
 
     @PreAuthorize("hasRole('STAFF')")
     @PatchMapping(path = "/staff/payment-categories/{name}")
-    public void update(@PathVariable String name, @RequestBody PaymentCategoryRequest request) {
-        ResponseEntity.ok(
+    public ResponseEntity<WebResponse<PaymentCategoryResponse>> update(@PathVariable String name, @RequestBody PaymentCategoryRequest request) {
+        return ResponseEntity.ok(
             WebResponse.<PaymentCategoryResponse>builder()
             .data(service.update(name, request))
             .message("Pembayaran berhasil diedit")
+            .build()
+        );
+    }
+
+    @PreAuthorize("hasRole('STAFF')")
+    @PatchMapping(path = "/staff/payment-categories/{name}")
+    public ResponseEntity<WebResponse<String>> delete(@PathVariable String name) {
+
+        service.delete(name);
+        return ResponseEntity.ok(
+            WebResponse.<String>builder()
+            .message("Pembayaran berhasil dihapus")
             .build()
         );
     }
