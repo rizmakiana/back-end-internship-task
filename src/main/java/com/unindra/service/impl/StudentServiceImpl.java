@@ -124,8 +124,11 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public void delete(String studentId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
+        Student student = repository.findByStudentId(studentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Siswa masih memiliki tabungan. Harap tarik semua tabungan terlebih dahulu"));
+
+        repository.delete(student);
     }
 
     public StudentResponse getStudentTableData(Student student) {

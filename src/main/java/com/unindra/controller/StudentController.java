@@ -53,4 +53,13 @@ public class StudentController {
                         .build());
     }
 
+    @PreAuthorize("hasRole('STAFF')")
+    @GetMapping(path = "/staff/students/{studentId}")
+    public void delete(@PathVariable String id) {
+        ResponseEntity.ok(
+                WebResponse.<StudentResponse>builder()
+                        .message("Siswa berhasil dihapus")
+                        .build());
+    }
+
 }

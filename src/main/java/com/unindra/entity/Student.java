@@ -27,7 +27,7 @@ public class Student extends User {
     @OneToMany(mappedBy = "student")
     private List<Payment> payments;
 
-    @OneToMany(mappedBy = "student")
+    @OneToMany(mappedBy = "student", orphanRemoval = false)
     private List<Deposit> deposits;
     
 }
