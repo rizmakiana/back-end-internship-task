@@ -1,14 +1,23 @@
 package com.unindra.service.impl;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.unindra.entity.Classroom;
+import com.unindra.entity.PaymentCategory;
 import com.unindra.entity.PaymentDetail;
 import com.unindra.model.request.PaymentDetailRequest;
 import com.unindra.model.response.PaymentDetailResponse;
+import com.unindra.repository.ClassroomRepository;
 import com.unindra.repository.PaymentDetailRepository;
+import com.unindra.service.PaymentCategoryService;
 import com.unindra.service.PaymentDetailService;
+import com.unindra.service.ValidationService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,18 +26,58 @@ import lombok.RequiredArgsConstructor;
 public class PaymentDetailServiceImpl implements PaymentDetailService {
 
     private final PaymentDetailRepository repository;
-    
+
+    private final ValidationService validationService;
+
+    private final PaymentCategoryService categoryService;
+
+    private final ClassroomRepository classroomRepository;
+
     @Override
     public List<PaymentDetailResponse> getAll() {
         return repository.findAll().stream()
-            .map(detail -> getPaymentDetailResponse(detail))
-            .toList();
+                .map(detail -> getPaymentDetailResponse(detail))
+                .toList();
     }
 
     @Override
     public PaymentDetailResponse add(PaymentDetailRequest request) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'add'");
+        validationService.validate(request);
+
+        PaymentCategory category = categoryService.findByName(request.getCategoryName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Kategori pembayaran tidak ditemukan"));
+
+        Classroom classroom = classroomRepository.findByCode(request.getClassroomCode()).orElse(null);
+
+        if (repository.existsByPaymentCategoryAndClassroomAndName(category, classroom, request.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Pembayaran sudah ada");
+        }
+
+        BigDecimal amount = Optional.ofNullable(request.getUnitPrice())
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(a -> {
+                    try {
+                        return new BigDecimal(a);
+                    } catch (NumberFormatException e) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Nominal pembayaran tidak valid");
+                    }
+                })
+                .filter(a -> a.compareTo(BigDecimal.ZERO) > 0)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Nominal pembayaran harus lebih dari Rp. 0"));
+
+        PaymentDetail paymentDetail = new PaymentDetail();
+        paymentDetail.setPaymentCategory(category);
+        paymentDetail.setClassroom(classroom);
+        paymentDetail.setName(request.getName());
+        paymentDetail.setUnitPrice(amount);
+
+        return getPaymentDetailResponse(repository.save(paymentDetail));
+
     }
 
     @Override
@@ -45,11 +94,11 @@ public class PaymentDetailServiceImpl implements PaymentDetailService {
 
     private PaymentDetailResponse getPaymentDetailResponse(PaymentDetail paymentDetail) {
         return PaymentDetailResponse.builder()
-            .categoryName(paymentDetail.getPaymentCategory().getName())
-            .paymentName(paymentDetail.getName())
-            .classroomCode(paymentDetail.getClassroom().getCode())
-            .unitPrice(paymentDetail.getUnitPrice().toPlainString())
-            .build();
+                .categoryName(paymentDetail.getPaymentCategory().getName())
+                .paymentName(paymentDetail.getName())
+                .classroomCode(paymentDetail.getClassroom().getCode())
+                .unitPrice(paymentDetail.getUnitPrice().toPlainString())
+                .build();
     }
-    
+
 }

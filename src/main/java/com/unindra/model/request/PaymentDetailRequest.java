@@ -11,6 +11,8 @@ public class PaymentDetailRequest {
 
     private String classroomCode;
 
+    private String name;
+
     private String unitPrice;
 
 }
