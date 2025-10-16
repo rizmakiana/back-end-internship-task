@@ -14,6 +14,6 @@ public interface PaymentDetailService {
 
     PaymentDetailResponse update(String categoryAndClassroomAndPaymentName, PaymentDetailUpdate request);
 
-    void delete(String categoryAndPaymentName);
+    void delete(String categoryAndClassroomAndPaymentName);
     
 }
