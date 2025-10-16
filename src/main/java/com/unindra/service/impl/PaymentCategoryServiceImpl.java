@@ -46,8 +46,18 @@ public class PaymentCategoryServiceImpl implements PaymentCategoryService {
 
     @Override
     public PaymentCategoryResponse update(String name, PaymentCategoryRequest request) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+        PaymentCategory category = repository.findByName(name)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Kategori pembayaran tidak ditemukan"));
+
+        if (repository.existsByNameAndIdNot(name, category.getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Kategori pembayaran sudah ada");
+        }
+
+        category.setName(request.getName());
+
+        return getPaymentCategoryResponse(repository.save(category));
     }
 
     @Override
