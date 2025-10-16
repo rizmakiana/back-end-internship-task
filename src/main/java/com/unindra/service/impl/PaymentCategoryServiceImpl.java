@@ -39,8 +39,9 @@ public class PaymentCategoryServiceImpl implements PaymentCategoryService {
 
     @Override
     public List<PaymentCategoryResponse> getAll() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAll'");
+        return repository.findAll().stream()
+                .map(category -> getPaymentCategoryResponse(category))
+                .toList();
     }
 
     @Override

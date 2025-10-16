@@ -1,7 +1,10 @@
 package com.unindra.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +31,15 @@ public class PaymentCategoryController {
                 WebResponse.<PaymentCategoryResponse>builder()
                         .data(service.add(request))
                         .message("Kategori Pembayaran berhasil ditambah")
+                        .build());
+    }
+
+    @PreAuthorize("hasRole('STAFF')")
+    @GetMapping(path = "/staff/payment-categories")
+    public ResponseEntity<WebResponse<List<PaymentCategoryResponse>>> get() {
+        return ResponseEntity.ok(
+                WebResponse.<List<PaymentCategoryResponse>>builder()
+                        .data(service.getAll())
                         .build());
     }
 }
