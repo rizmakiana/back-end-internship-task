@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -55,7 +57,7 @@ public class StudentController {
     }
 
     @PreAuthorize("hasRole('STAFF')")
-    @GetMapping(path = "/staff/students/{studentId}")
+    @DeleteMapping(path = "/staff/students/{studentId}")
     public ResponseEntity<WebResponse<String>> delete(@PathVariable String id) {
         service.delete(id);
         return ResponseEntity.ok(
@@ -65,7 +67,7 @@ public class StudentController {
     }
 
     @PreAuthorize("hasRole('STAFF')")
-    @GetMapping(path = "/staff/students/{studentId}")
+    @PatchMapping(path = "/staff/students/{studentId}")
     public ResponseEntity<WebResponse<StudentResponse>> update(@PathVariable String id, @RequestBody StudentUpdate update) {
         return ResponseEntity.ok(
                 WebResponse.<StudentResponse>builder()
