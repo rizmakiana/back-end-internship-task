@@ -33,4 +33,8 @@ public class PaymentDetail {
     @JoinColumn(name = "payment_category_id")
     private PaymentCategory paymentCategory;
 
+    @ManyToOne
+    @JoinColumn(name = "classroom_id", nullable = true)
+    private Classroom classroom;
+
 }

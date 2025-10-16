@@ -39,5 +39,8 @@ public class Classroom {
 
     @OneToMany(mappedBy = "classroom", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Section> sections;
+
+    @OneToMany(mappedBy = "classroom")
+    private List<PaymentDetail> paymentDetails;
     
 }
