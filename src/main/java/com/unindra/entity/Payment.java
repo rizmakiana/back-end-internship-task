@@ -36,4 +36,8 @@ public class Payment {
     @JoinColumn(name = "student_id")
     private Student student;
 
+    @ManyToOne
+    @JoinColumn(name = "payment_detail_id")
+    private PaymentDetail paymentDetail;
+
 }
