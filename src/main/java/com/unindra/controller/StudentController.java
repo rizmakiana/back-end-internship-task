@@ -6,9 +6,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.unindra.model.request.StudentRequest;
 import com.unindra.model.response.StudentResponse;
 import com.unindra.model.response.WebResponse;
 import com.unindra.service.StudentService;
@@ -40,5 +43,14 @@ public class StudentController {
                         .build());
     }
 
+    @PreAuthorize("hasRole('STAFF')")
+    @PostMapping(path = "/staff/students")
+    public void add(@RequestBody StudentRequest request) {
+        ResponseEntity.ok(
+                WebResponse.<StudentResponse>builder()
+                        .data(service.add(request))
+                        .message("Registrasi siswa sukses")
+                        .build());
+    }
 
 }

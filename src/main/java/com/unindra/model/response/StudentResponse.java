@@ -1,7 +1,5 @@
 package com.unindra.model.response;
 
-import java.time.LocalDate;
-
 import com.unindra.model.util.Gender;
 
 import lombok.Builder;
@@ -19,7 +17,7 @@ public class StudentResponse {
 
     private String regencyId;
 
-    private LocalDate birthDate;
+    private String birthDate;
 
     private String districtId;
 
