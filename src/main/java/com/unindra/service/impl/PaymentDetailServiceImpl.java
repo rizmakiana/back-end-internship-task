@@ -12,6 +12,7 @@ import com.unindra.entity.Classroom;
 import com.unindra.entity.PaymentCategory;
 import com.unindra.entity.PaymentDetail;
 import com.unindra.model.request.PaymentDetailRequest;
+import com.unindra.model.request.PaymentDetailUpdate;
 import com.unindra.model.response.PaymentDetailResponse;
 import com.unindra.repository.ClassroomRepository;
 import com.unindra.repository.PaymentDetailRepository;
@@ -63,12 +64,12 @@ public class PaymentDetailServiceImpl implements PaymentDetailService {
                         return new BigDecimal(a);
                     } catch (NumberFormatException e) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Nominal pembayaran tidak valid");
+                                "Nominal pembayaran tidak valid");
                     }
                 })
                 .filter(a -> a.compareTo(BigDecimal.ZERO) > 0)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Nominal pembayaran harus lebih dari Rp. 0"));
+                        "Nominal pembayaran harus lebih dari Rp. 0"));
 
         PaymentDetail paymentDetail = new PaymentDetail();
         paymentDetail.setPaymentCategory(category);
@@ -81,9 +82,50 @@ public class PaymentDetailServiceImpl implements PaymentDetailService {
     }
 
     @Override
-    public PaymentDetailResponse update(String categoryAndPaymentName, PaymentDetailRequest request) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+    public PaymentDetailResponse update(String categoryAndClassroomAndPaymentName, PaymentDetailUpdate request) {
+        validationService.validate(request);
+
+        String[] keyword = categoryAndClassroomAndPaymentName.split("-");
+
+        PaymentCategory category = categoryService.findByName(keyword[0])
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Kategori pembayaran tidak ditemukan"));
+
+        Classroom classroom = classroomRepository.findByCode(keyword[1]).orElse(null);
+
+        PaymentDetail detail = repository.findByPaymentCategoryAndClassroomAndName(category, classroom, keyword[2])
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            "Pembayaran tidak ditemukan"));
+
+        if (repository.existsByPaymentCategoryAndClassroomAndName(category, classroom, request.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pembayaran sudah ada");
+        }
+
+        BigDecimal amount = Optional.ofNullable(request.getUnitPrice())
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(a -> {
+                    try {
+                        return new BigDecimal(a);
+                    } catch (NumberFormatException e) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Nominal pembayaran tidak valid");
+                    }
+                })
+                .filter(a -> a.compareTo(BigDecimal.ZERO) > 0)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Nominal pembayaran harus lebih dari Rp. 0"));
+
+        // check if unit price changed and has a payments
+        if (!detail.getUnitPrice().equals(amount) && !detail.getPayments().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            "Tidak dapat mengubah harga pembayaran karena sudah ada pembayaran masuk");
+        }
+        
+        detail.setName(request.getName());
+        detail.setUnitPrice(amount);
+        
+        return getPaymentDetailResponse(repository.save(detail));
     }
 
     @Override

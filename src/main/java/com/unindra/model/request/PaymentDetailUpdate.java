@@ -6,14 +6,8 @@ import lombok.Data;
 
 @Data
 @Builder
-public class PaymentDetailRequest {
+public class PaymentDetailUpdate {
     
-    @NotBlank
-    private String categoryName;
-
-    @NotBlank
-    private String classroomCode;
-
     @NotBlank
     private String name;
 
