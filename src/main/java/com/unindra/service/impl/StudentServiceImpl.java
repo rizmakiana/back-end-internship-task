@@ -164,12 +164,11 @@ public class StudentServiceImpl implements StudentService {
                         () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tingkat kelas tidak ditemukan"));
 
         Section section = classroom.getSections().stream()
-                .filter(s -> s.getName().equals(String.valueOf(request.getSection())))
+                .filter(s -> String.valueOf(s.getName()).equals(request.getSection()))
                         .findFirst()
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                                 "Tidak ada kelas ditemukan"));
 
-        student.setStudentId(generateNextStudentId());
         student.setName(request.getName());
         student.setGender(request.getGender());
         student.setBirthplace(regency);
@@ -177,7 +176,6 @@ public class StudentServiceImpl implements StudentService {
         student.setDistrictAddress(district);
         student.setAddress(request.getAddress());
         student.setUsername(request.getUsername());
-        student.setPassword(passwordEncoder.encode(birthDate.format(TimeFormat.formatter)));
         student.setEmail(request.getEmail());
         student.setPhoneNumber(request.getPhoneNumber());
         student.setSection(section);
