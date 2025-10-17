@@ -71,11 +71,15 @@ public class ClassroomServiceImpl implements ClassroomService {
     }
 
     public ClassroomResponse getClassroomResponse(Classroom classroom) {
+        int totalSection = Optional.ofNullable(classroom.getSections())
+            .map(List::size)
+            .orElse(0);
+
         return ClassroomResponse.builder()
                 .code(classroom.getCode())
                 .departmentName(classroom.getDepartment().getName())
                 .gradeLevel(classroom.getGradeLevel())
-                .totalSection(classroom.getSections().size())
+                .totalSection(totalSection)
                 .build();
     }
 
