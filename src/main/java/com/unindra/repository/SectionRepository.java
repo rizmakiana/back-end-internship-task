@@ -13,5 +13,7 @@ public interface SectionRepository extends JpaRepository<Section, String>{
     Optional<Section> findByCode(String code);
 
     Optional<Section> findByClassroomAndCode(Classroom classroom, String code);
+
+    boolean existsByClassroomAndName(Classroom classroom, Character name);
     
 }

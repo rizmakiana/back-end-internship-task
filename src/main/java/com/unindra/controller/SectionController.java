@@ -54,7 +54,7 @@ public class SectionController {
         return ResponseEntity.ok(
                 WebResponse.<SectionResponse>builder()
                         .data(service.update(code, request))
-                        .message("Kelas berhasil ditambah")
+                        .message("Kelas berhasil diubah")
                         .build());
     }
 

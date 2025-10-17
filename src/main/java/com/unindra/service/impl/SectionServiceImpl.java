@@ -1,6 +1,7 @@
 package com.unindra.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -70,12 +71,10 @@ public class SectionServiceImpl implements SectionService {
 
         Classroom classroom = section.getClassroom();
 
-        repository.findByClassroomAndCode(classroom, code).ifPresent(existing -> {
-            if (!existing.getId().equals(section.getId())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+        if (repository.existsByClassroomAndName(classroom, request.getName().charAt(0))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
                 "Nama kelas sudah ada");
-            }
-        });
+        }
 
         String oldCode = section.getCode();
         String prefix = oldCode.substring(0, oldCode.lastIndexOf(" "));
@@ -100,12 +99,17 @@ public class SectionServiceImpl implements SectionService {
     }
 
     public SectionResponse getSectionResponse(Section section) {
+
+        int totalClassroom = Optional.ofNullable(section.getStudents())
+            .map(List::size)
+            .orElse(0);
+
         return SectionResponse.builder()
                 .code(section.getCode())
                 .departmentName(section.getClassroom().getDepartment().getName())
                 .gradeLevel(section.getClassroom().getGradeLevel())
                 .name(section.getName())
-                .totalStudents(section.getStudents().size())
+                .totalStudents(totalClassroom)
                 .build();
     }
 
