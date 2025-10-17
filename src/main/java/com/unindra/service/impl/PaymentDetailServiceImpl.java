@@ -97,7 +97,10 @@ public class PaymentDetailServiceImpl implements PaymentDetailService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Pembayaran tidak ditemukan"));
 
-        if (repository.existsByPaymentCategoryAndClassroomAndName(category, classroom, request.getName())) {
+        boolean paymentNameChanged = !detail.getName().equals(request.getName());
+        boolean isPaymentAlreadyExists = repository.existsByPaymentCategoryAndClassroomAndName(category, classroom,
+                request.getName());
+        if (paymentNameChanged && isPaymentAlreadyExists) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pembayaran sudah ada");
         }
 
@@ -151,11 +154,18 @@ public class PaymentDetailServiceImpl implements PaymentDetailService {
     }
 
     private PaymentDetailResponse getPaymentDetailResponse(PaymentDetail paymentDetail) {
+
+        String classroomCode = Optional.ofNullable(paymentDetail.getClassroom())
+                .map(Classroom::getCode)
+                .orElse("Regular");
+
         return PaymentDetailResponse.builder()
                 .categoryName(paymentDetail.getPaymentCategory().getName())
                 .paymentName(paymentDetail.getName())
-                .classroomCode(paymentDetail.getClassroom().getCode())
-                .unitPrice(paymentDetail.getUnitPrice().toPlainString())
+                .classroomCode(classroomCode)
+                .unitPrice(paymentDetail.getUnitPrice()
+                        .stripTrailingZeros()
+                        .toPlainString())
                 .build();
     }
 
