@@ -1,0 +1,32 @@
+POST http://localhost:8080/api/staff
+Accept: application/json
+Content-Type: application/json
+
+{
+    "name": "Rizma Kiana",
+    "gender": 0,
+    "birthPlaceRegency": "3201",
+    "birthDate": "22",
+    "birthMonth": "5",
+    "birthYear": "2000",
+    "districtAddress": "320107",
+    "address": "Perempatan Cileungsi",
+    "username": "rizmakiana",
+    "password": "1234",
+    "confirmPassword": "1234",
+    "email": "rizky1517@gmail.com",
+    "phoneNumber": "081384422595"
+}
+
+
+### Login Staff 
+
+POST http://localhost:8080/api/auth/login
+Accept: application/json
+Content-Type: application/json
+
+{
+    "username": "rizmakiana",
+    "password": "1234"
+}
+
