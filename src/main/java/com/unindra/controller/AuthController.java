@@ -1,8 +1,5 @@
 package com.unindra.controller;
 
-import java.util.Locale;
-
-import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,7 +17,9 @@ import com.unindra.model.response.WebResponse;
 import com.unindra.util.JwtUtil;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping(path = "/api/auth")
 @RequiredArgsConstructor

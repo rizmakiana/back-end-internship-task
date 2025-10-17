@@ -1,11 +1,8 @@
 package com.unindra.controller;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,8 +20,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ErrorController {
 
-    private final MessageSource messageSource;
-
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<WebResponse<Object>> constraintViolationException(ConstraintViolationException exception) {
 
@@ -37,9 +32,8 @@ public class ErrorController {
             errors.put(fieldName, message);
         }
 
-        Locale locale = LocaleContextHolder.getLocale();
         WebResponse<Object> response = WebResponse.builder()
-                .message(messageSource.getMessage("validation.fail", null, locale))
+                .message("Validasi gagal")
                 .errors(errors)
                 .build();
 
@@ -54,10 +48,9 @@ public class ErrorController {
 
     @ExceptionHandler({ BadCredentialsException.class, UsernameNotFoundException.class })
     public ResponseEntity<WebResponse<Object>> handleAuthExceptions(Exception ex) {
-        Locale locale = LocaleContextHolder.getLocale();
 
         WebResponse<Object> response = WebResponse.builder()
-                .errors(messageSource.getMessage("login.fail", null, locale))
+                .errors("Nama pengguna atau Kata sandi salah")
                 .build();
 
         return ResponseEntity.badRequest().body(response);
