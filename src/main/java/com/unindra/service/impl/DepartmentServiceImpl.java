@@ -112,10 +112,15 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     public DepartmentResponse getDepartmentResponse(Department department) {
+
+        int totalClassroom = Optional.ofNullable(department.getClassrooms())
+            .map(List::size)
+            .orElse(0);
+
         return DepartmentResponse.builder()
                 .departmentName(department.getName())
                 .code(department.getCode())
-                .totalClassroom(department.getClassrooms().size())
+                .totalClassroom(totalClassroom)
                 .build();
     }
 

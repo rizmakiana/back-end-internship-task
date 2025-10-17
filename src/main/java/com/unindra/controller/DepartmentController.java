@@ -54,7 +54,7 @@ public class DepartmentController {
             @RequestBody DepartmentRequest request) {
         return ResponseEntity.ok(
                 WebResponse.<DepartmentResponse>builder()
-                        .data(service.add(request))
+                        .data(service.update(code, request))
                         .message("Jurusan berhasil diedit")
                         .build());
     }
