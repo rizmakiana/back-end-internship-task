@@ -79,9 +79,14 @@ public class PaymentCategoryServiceImpl implements PaymentCategoryService {
     }
 
     private PaymentCategoryResponse getPaymentCategoryResponse(PaymentCategory category) {
+
+        int totalPayment = Optional.ofNullable(category.getPaymentDetails())
+            .map(List::size)
+            .orElse(0);
+
         return PaymentCategoryResponse.builder()
                 .name(category.getName())
-                .totalPayment(category.getPaymentDetails().size())
+                .totalPayment(totalPayment)
                 .build();
     }
 
