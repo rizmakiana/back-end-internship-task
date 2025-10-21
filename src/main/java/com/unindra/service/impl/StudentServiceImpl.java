@@ -189,8 +189,12 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public void delete(String studentId) {
         Student student = repository.findByStudentId(studentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Siswa masih memiliki tabungan. Harap tarik semua tabungan terlebih dahulu"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Siswa tidak ditemukan"));
+
+        if (!student.getDeposits().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Siswa masih memiliki tabungan. Harap tarik semua tabungan terlebih dahulu");
+        }
 
         repository.delete(student);
     }
