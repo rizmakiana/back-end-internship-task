@@ -59,8 +59,8 @@ public class StudentController {
 
     @PreAuthorize("hasRole('STAFF')")
     @DeleteMapping(path = "/staff/students/{studentId}")
-    public ResponseEntity<WebResponse<String>> delete(@PathVariable String id) {
-        service.delete(id);
+    public ResponseEntity<WebResponse<String>> delete(@PathVariable String studentId) {
+        service.delete(studentId);
         return ResponseEntity.ok(
                 WebResponse.<String>builder()
                         .message("Siswa berhasil dihapus")
@@ -69,10 +69,10 @@ public class StudentController {
 
     @PreAuthorize("hasRole('STAFF')")
     @PatchMapping(path = "/staff/students/{studentId}")
-    public ResponseEntity<WebResponse<StudentResponse>> update(@PathVariable String id, @RequestBody StudentUpdate update) {
+    public ResponseEntity<WebResponse<StudentResponse>> update(@PathVariable String studentId, @RequestBody StudentUpdate update) {
         return ResponseEntity.ok(
                 WebResponse.<StudentResponse>builder()
-                        .data(service.update(id, update))
+                        .data(service.update(studentId, update))
                         .message("Siswa berhasil diedit")
                         .build());
     }
