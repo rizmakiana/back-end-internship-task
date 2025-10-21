@@ -20,6 +20,8 @@ import com.unindra.entity.Student;
 import com.unindra.model.request.StudentRequest;
 import com.unindra.model.request.StudentUpdate;
 import com.unindra.model.response.StudentResponse;
+import com.unindra.model.response.StudentTable;
+import com.unindra.model.util.Gender;
 import com.unindra.model.util.Role;
 import com.unindra.repository.StudentRepository;
 import com.unindra.service.ClassroomService;
@@ -61,14 +63,14 @@ public class StudentServiceImpl implements StudentService {
                     request.getBirthMonth(),
                     Integer.parseInt(request.getBirthDate()));
         } catch (DateTimeException | NumberFormatException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid.date");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tanggal lahir tidak valid");
         }
 
         Regency regency = regencyService.findById(request.getBirthPlaceRegency())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "regency.notfound"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tempat lahir tidak ditemukan"));
 
         District district = districtService.findById(request.getDistrictAddress())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "district.notfound"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Alamat tidak ditemukan"));
 
         if (repository.existsByUsername(request.getUsername())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nama pengguna telah digunakan");
@@ -110,11 +112,11 @@ public class StudentServiceImpl implements StudentService {
         student.setSection(section);
         student.setRole(Role.STUDENT);
 
-        return getStudentTableData(repository.save(student));
+        return getStudentDetail(repository.save(student));
     }
 
     @Override
-    public List<StudentResponse> getAll() {
+    public List<StudentTable> getAll() {
         return repository.findAll().stream()
                 .map(student -> getStudentTableData(student))
                 .toList();
@@ -181,7 +183,7 @@ public class StudentServiceImpl implements StudentService {
         student.setSection(section);
         student.setRole(Role.STUDENT);
 
-        return getStudentTableData(repository.save(student));
+        return getStudentDetail(repository.save(student));
     }
 
     @Override
@@ -193,12 +195,15 @@ public class StudentServiceImpl implements StudentService {
         repository.delete(student);
     }
 
-    public StudentResponse getStudentTableData(Student student) {
-        return StudentResponse.builder()
+    public StudentTable getStudentTableData(Student student) {
+
+        String gender = (student.getGender() == Gender.MALE) ? "Laki-laki" : "Perempuan";
+
+        return StudentTable.builder()
                 .studentId(student.getStudentId())
                 .name(student.getName())
-                .gender(student.getGender())
-                .regencyId(student.getBirthplace().getName())
+                .gender(gender)
+                .regencyName(student.getBirthplace().getName())
                 .birthDate(student.getBirthDate().format(TimeFormat.formatter2))
                 .department(student.getSection().getClassroom().getDepartment().getName())
                 .classroom(student.getSection().getClassroom().getGradeLevel())
@@ -212,7 +217,9 @@ public class StudentServiceImpl implements StudentService {
                 .name(student.getName())
                 .gender(student.getGender())
                 .regencyId(student.getBirthplace().getId())
-                .birthDate(student.getBirthDate().format(TimeFormat.formatter))
+                .birthDate(String.valueOf(student.getBirthDate().getDayOfMonth()))
+                .birthMonth(student.getBirthDate().getMonthValue())
+                .birthYear(String.valueOf(student.getBirthDate().getYear()))
                 .districtId(student.getDistrictAddress().getId())
                 .address(student.getAddress())
                 .username(student.getUsername())

@@ -19,6 +19,10 @@ public class StudentResponse {
 
     private String birthDate;
 
+    private Integer birthMonth;
+
+    private String birthYear;
+
     private String districtId;
 
     private String address;

@@ -5,6 +5,7 @@ import java.util.List;
 import com.unindra.model.request.StudentRequest;
 import com.unindra.model.request.StudentUpdate;
 import com.unindra.model.response.StudentResponse;
+import com.unindra.model.response.StudentTable;
 
 public interface StudentService {
     
@@ -12,7 +13,7 @@ public interface StudentService {
 
     StudentResponse getByStudentId(String studentId);
 
-    List<StudentResponse> getAll();
+    List<StudentTable> getAll();
 
     StudentResponse update(String studentId, StudentUpdate request);
 
