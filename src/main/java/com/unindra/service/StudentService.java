@@ -6,7 +6,6 @@ import java.util.Optional;
 import com.unindra.entity.Student;
 import com.unindra.model.request.StudentRequest;
 import com.unindra.model.request.StudentUpdate;
-import com.unindra.model.response.StudentDepositResponse;
 import com.unindra.model.response.StudentResponse;
 import com.unindra.model.response.StudentTable;
 
@@ -24,6 +23,8 @@ public interface StudentService {
 
     Optional<Student> findByStudentId(String studentId);
 
-    List<StudentDepositResponse> getStudentsDeposit();
+    List<Student> findAll();
+
+    
 
 }

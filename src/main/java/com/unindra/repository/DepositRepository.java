@@ -20,5 +20,6 @@ public interface DepositRepository extends JpaRepository<Deposit, String> {
     @Query("SELECT COALESCE(SUM(d.amount), 0) FROM Deposit d WHERE d.student = :student AND d.transactionType = :type")
     Optional<BigDecimal> sumByStudentAndTransactionType(@Param("student") Student student, @Param("type") TransactionType type);
 
+    long countByTransactionType(TransactionType transactionType);
 
 }

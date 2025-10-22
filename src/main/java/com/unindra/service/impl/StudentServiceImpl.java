@@ -1,6 +1,5 @@
 package com.unindra.service.impl;
 
-import java.math.BigDecimal;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.Year;
@@ -20,16 +19,13 @@ import com.unindra.entity.Section;
 import com.unindra.entity.Student;
 import com.unindra.model.request.StudentRequest;
 import com.unindra.model.request.StudentUpdate;
-import com.unindra.model.response.StudentDepositResponse;
 import com.unindra.model.response.StudentResponse;
 import com.unindra.model.response.StudentTable;
 import com.unindra.model.util.Gender;
 import com.unindra.model.util.Role;
-import com.unindra.model.util.TransactionType;
 import com.unindra.repository.StudentRepository;
 import com.unindra.service.ClassroomService;
 import com.unindra.service.DepartmentService;
-import com.unindra.service.DepositService;
 import com.unindra.service.DistrictService;
 import com.unindra.service.RegencyService;
 import com.unindra.service.StudentService;
@@ -56,7 +52,6 @@ public class StudentServiceImpl implements StudentService {
 
     private final ClassroomService classroomService;
 
-    private final DepositService depositService;
 
     @Override
     public StudentResponse add(StudentRequest request) {
@@ -282,24 +277,8 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public List<StudentDepositResponse> getStudentsDeposit() {
-        return repository.findAll().stream()
-                .map(student -> {
-                    BigDecimal totalDeposit = depositService.sumByStudentAndTransactionType(student, TransactionType.DEPOSIT)
-                        .orElse(BigDecimal.ZERO);
-
-                    BigDecimal totalWithDraw = depositService.sumByStudentAndTransactionType(student, TransactionType.WITHDRAW)
-                        .orElse(BigDecimal.ZERO);
-                    
-                    BigDecimal balance = totalDeposit.subtract(totalWithDraw);
-
-                    return StudentDepositResponse.builder()
-                        .studentId(student.getStudentId())
-                        .studentName(student.getName())
-                        .totalDeposit(balance)
-                        .build();
-                })
-                .toList();
+    public List<Student> findAll() {
+        return repository.findAll();
     }
 
 }

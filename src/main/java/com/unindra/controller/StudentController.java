@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.unindra.model.request.StudentRequest;
 import com.unindra.model.request.StudentUpdate;
-import com.unindra.model.response.StudentDepositResponse;
 import com.unindra.model.response.StudentResponse;
 import com.unindra.model.response.StudentTable;
 import com.unindra.model.response.WebResponse;
@@ -76,16 +75,6 @@ public class StudentController {
                         .data(service.update(studentId, update))
                         .message("Siswa berhasil diedit")
                         .build());
-    }
-
-    @PreAuthorize("hasRole('STAFF')")
-    @GetMapping(path = "/staff/students/deposits")
-    public ResponseEntity<WebResponse<List<StudentDepositResponse>>> getStudentDeposits() {
-        return ResponseEntity.ok(
-                WebResponse.<List<StudentDepositResponse>>builder()
-                        .data(service.getStudentsDeposit())
-                        .build()
-        );
     }
 
 }
