@@ -3,6 +3,7 @@ package com.unindra.entity;
 import java.math.BigDecimal;
 import java.util.List;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -29,6 +30,7 @@ public class PaymentDetail {
 
     private String name;
 
+    @Column(precision = 12, scale = 0)
     private BigDecimal unitPrice;
 
     @ManyToOne

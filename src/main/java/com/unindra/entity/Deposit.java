@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import com.unindra.model.util.TransactionType;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,6 +33,7 @@ public class Deposit {
 
     private LocalDateTime date;
 
+    @Column(precision = 12, scale = 0)
     private BigDecimal amount;
 
     private TransactionType transactionType;

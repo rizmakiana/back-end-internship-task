@@ -12,6 +12,8 @@ import java.util.Optional;
 
 import com.unindra.model.util.TransactionType;
 import com.unindra.entity.Student;
+import java.util.List;
+
 
 
 @Repository
@@ -21,5 +23,7 @@ public interface DepositRepository extends JpaRepository<Deposit, String> {
     Optional<BigDecimal> sumByStudentAndTransactionType(@Param("student") Student student, @Param("type") TransactionType type);
 
     long countByTransactionType(TransactionType transactionType);
+
+    List<Deposit> findByStudent(Student student);
 
 }

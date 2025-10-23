@@ -1,6 +1,7 @@
 package com.unindra.model.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,7 +12,7 @@ public class DepositRequest {
     @NotBlank
     private String date;
 
-    @NotBlank
+    @NotNull
     private Integer month;
 
     @NotBlank

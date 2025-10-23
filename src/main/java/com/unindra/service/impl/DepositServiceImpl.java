@@ -14,11 +14,13 @@ import com.unindra.entity.Deposit;
 import com.unindra.entity.Student;
 import com.unindra.model.request.DepositRequest;
 import com.unindra.model.response.StudentDepositResponse;
+import com.unindra.model.response.StudentDepositsHistory;
 import com.unindra.model.util.TransactionType;
 import com.unindra.repository.DepositRepository;
 import com.unindra.service.DepositService;
 import com.unindra.service.StudentService;
 import com.unindra.service.ValidationService;
+import com.unindra.util.TimeFormat;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,7 +35,7 @@ public class DepositServiceImpl implements DepositService {
     private final ValidationService validationService;
 
     @Override
-    public void deposit(String studentId, DepositRequest request) {
+    public StudentDepositResponse deposit(String studentId, DepositRequest request) {
         validationService.validate(request);
 
         Student student = studentService.findByStudentId(studentId)
@@ -72,30 +74,77 @@ public class DepositServiceImpl implements DepositService {
 
         repository.save(deposit);
 
+        return getStudentDeposit(student);
+
     }
 
     @Override
-    public void withdrawal(String studentId, DepositRequest request) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'withdrawal'");
+    public StudentDepositResponse withdrawal(String studentId, DepositRequest request) {
+        validationService.validate(request);
+
+        Student student = studentService.findByStudentId(studentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Data siswa tidak ditemukan"));
+
+        LocalDateTime depositDate;
+        try {
+            depositDate = LocalDateTime.of(
+                    Integer.parseInt(request.getYear()),
+                    request.getMonth(),
+                    Integer.parseInt(request.getDate()),
+                    Integer.parseInt(request.getClock()),
+                    Integer.parseInt(request.getMinute()));
+        } catch (DateTimeException | NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tanggal tidak valid");
+        }
+
+        BigDecimal amount;
+        try {
+            amount = new BigDecimal(request.getAmount().trim());
+        } catch (NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nominal Tabungan tidak valid");
+        }
+
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nominal Tabungan harus lebih dari Rp. 0");
+        }
+
+        BigDecimal currentSavings = repository.sumByStudentAndTransactionType(student, TransactionType.DEPOSIT)
+                .orElse(BigDecimal.ZERO);
+
+        if (amount.compareTo(currentSavings) > 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Saldo tabungan tidak mencukupi");
+        }
+
+        Deposit deposit = new Deposit();
+        deposit.setStudent(student);
+        deposit.setDate(depositDate);
+        deposit.setTransactionType(TransactionType.WITHDRAW);
+        deposit.setAmount(amount);
+        deposit.setReferenceNumber(request.getReferenceNo());
+
+        repository.save(deposit);
+
+        return getStudentDeposit(student);
     }
 
     @Override
-    public String generateWithDrawalReferenceNumber() {
-            long count = repository.countByTransactionType(TransactionType.WITHDRAW);
+    public String generateReferenceNumber(String type) {
+        TransactionType transactionType;
+        if ("deposit".equalsIgnoreCase(type)) {
+            transactionType = TransactionType.DEPOSIT;
+        } else if ("withdraw".equalsIgnoreCase(type)) {
+            transactionType = TransactionType.WITHDRAW;
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipe transaksi tidak valid");
+        }
+
+        String keyword = (transactionType == TransactionType.DEPOSIT) ? "DEPOSIT" : "WITHDRAW";
+        long count = repository.countByTransactionType(transactionType);
         long next = count + 1;
 
-        // Contoh hasil: S/DEPOSIT-0001
-        return String.format("S/DEPOSIT-%04d", next);
-    }
-
-    @Override
-    public String generateDepositReferenceNumber() {
-        long count = repository.countByTransactionType(TransactionType.DEPOSIT);
-        long next = count + 1;
-
-        // Contoh hasil: S/DEPOSIT-0001
-        return String.format("S/DEPOSIT-%04d", next);
+        // Contoh hasil: S/WITHDRAWAL-0001
+        return String.format("S/%s-%04d", keyword, next);
     }
 
     @Override
@@ -106,22 +155,55 @@ public class DepositServiceImpl implements DepositService {
     @Override
     public List<StudentDepositResponse> getStudentsDeposit() {
         return studentService.findAll().stream()
-                .map(student -> {
-                    BigDecimal totalDeposit = repository
-                            .sumByStudentAndTransactionType(student, TransactionType.DEPOSIT)
-                            .orElse(BigDecimal.ZERO);
-
-                    BigDecimal totalWithDraw = repository
-                            .sumByStudentAndTransactionType(student, TransactionType.WITHDRAW)
-                            .orElse(BigDecimal.ZERO);
-
-                    BigDecimal balance = totalDeposit.subtract(totalWithDraw);
-
-                    return StudentDepositResponse.builder()
-                            .totalDeposit(balance)
-                            .build();
-                })
+                .map(student -> getStudentDeposit(student))
                 .toList();
+    }
+
+    @Override
+    public StudentDepositResponse getStudentDeposit(Student student) {
+        BigDecimal totalDeposit = repository.sumByStudentAndTransactionType(student, TransactionType.DEPOSIT)
+                .orElse(BigDecimal.ZERO);
+
+        BigDecimal totalWithDraw = repository
+                .sumByStudentAndTransactionType(student, TransactionType.WITHDRAW)
+                .orElse(BigDecimal.ZERO);
+
+        BigDecimal balance = totalDeposit.subtract(totalWithDraw);
+
+        return StudentDepositResponse.builder()
+                .studentId(student.getStudentId())
+                .studentName(student.getName())
+                .totalDeposit(balance)
+                .build();
+
+    }
+
+    @Override
+    public List<StudentDepositsHistory> getStudentDepositHistory(String studentId) {
+
+        Student student = studentService.findByStudentId(studentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Data siswa tidak ditemukan"));
+
+        return student.getDeposits().stream()
+                .map(deposit -> {
+                    BigDecimal dept = BigDecimal.ZERO;
+                    BigDecimal wd = BigDecimal.ZERO;
+
+                    if (deposit.getTransactionType() == TransactionType.DEPOSIT) {
+                        dept = deposit.getAmount();
+                    } else {
+                        wd = deposit.getAmount();
+
+                    }
+
+                    return StudentDepositsHistory.builder()
+                            .referenceNo(deposit.getReferenceNumber())
+                            .date(deposit.getDate().format(TimeFormat.formatter2))
+                            .depositAmount(dept)
+                            .withdrawAmount(wd)
+                            .build();
+                }).toList();
     }
 
 }
