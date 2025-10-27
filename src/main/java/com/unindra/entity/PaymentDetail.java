@@ -42,6 +42,6 @@ public class PaymentDetail {
     private Classroom classroom;
 
     @OneToMany(mappedBy = "paymentDetail")
-    private List<Payment> payments;
+    private List<PaymentItem> paymentItems;
 
 }

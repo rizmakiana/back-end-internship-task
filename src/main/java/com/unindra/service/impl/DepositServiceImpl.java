@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.unindra.entity.Deposit;
 import com.unindra.entity.Student;
 import com.unindra.model.request.DepositRequest;
+import com.unindra.model.response.DepositHistoryResponse;
 import com.unindra.model.response.StudentDepositResponse;
 import com.unindra.model.response.StudentDepositsHistory;
 import com.unindra.model.util.TransactionType;
@@ -204,6 +205,25 @@ public class DepositServiceImpl implements DepositService {
                             .withdrawAmount(wd)
                             .build();
                 }).toList();
+    }
+
+    @Override
+    public List<DepositHistoryResponse> getAllHistory() {
+        return repository.findAll().stream()
+                .map(deposit -> DepositHistoryResponse.builder()
+                        .referenceNumber(deposit.getReferenceNumber())
+                        .studentName(deposit.getStudent().getName())
+                        .date(deposit.getDate().format(TimeFormat.formatter2))
+                        .depositAmount(formatAmount(deposit, TransactionType.DEPOSIT))
+                        .withdrawalAmount(formatAmount(deposit, TransactionType.WITHDRAW))
+                        .build())
+                .toList();
+    }
+
+    private String formatAmount(Deposit deposit, TransactionType type) {
+        return deposit.getTransactionType() == type
+                ? deposit.getAmount().toPlainString()
+                : "0";
     }
 
 }

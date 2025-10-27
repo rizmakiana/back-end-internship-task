@@ -11,13 +11,17 @@ import org.springframework.web.server.ResponseStatusException;
 import com.unindra.entity.Classroom;
 import com.unindra.entity.PaymentCategory;
 import com.unindra.entity.PaymentDetail;
+import com.unindra.entity.Student;
 import com.unindra.model.request.PaymentDetailRequest;
 import com.unindra.model.request.PaymentDetailUpdate;
+import com.unindra.model.response.PaymentDetailBillResponse;
 import com.unindra.model.response.PaymentDetailResponse;
+import com.unindra.model.response.StudentUnpaidResponse;
 import com.unindra.repository.ClassroomRepository;
 import com.unindra.repository.PaymentDetailRepository;
 import com.unindra.service.PaymentCategoryService;
 import com.unindra.service.PaymentDetailService;
+import com.unindra.service.StudentService;
 import com.unindra.service.ValidationService;
 
 import lombok.RequiredArgsConstructor;
@@ -26,147 +30,167 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PaymentDetailServiceImpl implements PaymentDetailService {
 
-    private final PaymentDetailRepository repository;
+	private final PaymentDetailRepository repository;
 
-    private final ValidationService validationService;
+	private final ValidationService validationService;
 
-    private final PaymentCategoryService categoryService;
+	private final PaymentCategoryService categoryService;
 
-    private final ClassroomRepository classroomRepository;
+	private final ClassroomRepository classroomRepository;
 
-    @Override
-    public List<PaymentDetailResponse> getAll() {
-        return repository.findAll().stream()
-                .map(detail -> getPaymentDetailResponse(detail))
-                .toList();
-    }
+	private final StudentService studentService;
 
-    @Override
-    public PaymentDetailResponse add(PaymentDetailRequest request) {
-        validationService.validate(request);
+	@Override
+	public List<PaymentDetailResponse> getAll() {
+		return repository.findAll().stream()
+				.map(detail -> getPaymentDetailResponse(detail))
+				.toList();
+	}
 
-        PaymentCategory category = categoryService.findByName(request.getCategoryName())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Kategori pembayaran tidak ditemukan"));
+	@Override
+	public PaymentDetailResponse add(PaymentDetailRequest request) {
+		validationService.validate(request);
 
-        Classroom classroom = classroomRepository.findByCode(request.getClassroomCode()).orElse(null);
+		PaymentCategory category = categoryService.findByName(request.getCategoryName())
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+						"Kategori pembayaran tidak ditemukan"));
 
-        if (repository.existsByPaymentCategoryAndClassroomAndName(category, classroom, request.getName())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Pembayaran sudah ada");
-        }
+		Classroom classroom = classroomRepository.findByCode(request.getClassroomCode()).orElse(null);
 
-        BigDecimal amount = Optional.ofNullable(request.getUnitPrice())
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .map(a -> {
-                    try {
-                        return new BigDecimal(a);
-                    } catch (NumberFormatException e) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                "Nominal pembayaran tidak valid");
-                    }
-                })
-                .filter(a -> a.compareTo(BigDecimal.ZERO) > 0)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Nominal pembayaran harus lebih dari Rp. 0"));
+		if (repository.existsByPaymentCategoryAndClassroomAndName(category, classroom, request.getName())) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					"Pembayaran sudah ada");
+		}
 
-        PaymentDetail paymentDetail = new PaymentDetail();
-        paymentDetail.setPaymentCategory(category);
-        paymentDetail.setClassroom(classroom);
-        paymentDetail.setName(request.getName());
-        paymentDetail.setUnitPrice(amount);
+		BigDecimal amount = Optional.ofNullable(request.getUnitPrice())
+				.map(String::trim)
+				.filter(s -> !s.isEmpty())
+				.map(a -> {
+					try {
+						return new BigDecimal(a);
+					} catch (NumberFormatException e) {
+						throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+								"Nominal pembayaran tidak valid");
+					}
+				})
+				.filter(a -> a.compareTo(BigDecimal.ZERO) > 0)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+						"Nominal pembayaran harus lebih dari Rp. 0"));
 
-        return getPaymentDetailResponse(repository.save(paymentDetail));
+		PaymentDetail paymentDetail = new PaymentDetail();
+		paymentDetail.setPaymentCategory(category);
+		paymentDetail.setClassroom(classroom);
+		paymentDetail.setName(request.getName());
+		paymentDetail.setUnitPrice(amount);
 
-    }
+		return getPaymentDetailResponse(repository.save(paymentDetail));
 
-    @Override
-    public PaymentDetailResponse update(String categoryAndClassroomAndPaymentName, PaymentDetailUpdate request) {
-        validationService.validate(request);
+	}
 
-        String[] keyword = categoryAndClassroomAndPaymentName.split("-");
+	@Override
+	public PaymentDetailResponse update(String categoryAndClassroomAndPaymentName, PaymentDetailUpdate request) {
+		validationService.validate(request);
 
-        PaymentCategory category = categoryService.findByName(keyword[0])
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Kategori pembayaran tidak ditemukan"));
+		String[] keyword = categoryAndClassroomAndPaymentName.split("-");
 
-        Classroom classroom = classroomRepository.findByCode(keyword[1]).orElse(null);
+		PaymentCategory category = categoryService.findByName(keyword[0])
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+						"Kategori pembayaran tidak ditemukan"));
 
-        PaymentDetail detail = repository.findByPaymentCategoryAndClassroomAndName(category, classroom, keyword[2])
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Pembayaran tidak ditemukan"));
+		Classroom classroom = classroomRepository.findByCode(keyword[1]).orElse(null);
 
-        boolean paymentNameChanged = !detail.getName().equals(request.getName());
-        boolean isPaymentAlreadyExists = repository.existsByPaymentCategoryAndClassroomAndName(category, classroom,
-                request.getName());
-        if (paymentNameChanged && isPaymentAlreadyExists) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pembayaran sudah ada");
-        }
+		PaymentDetail detail = repository
+				.findByPaymentCategoryAndClassroomAndName(category, classroom, keyword[2])
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+						"Pembayaran tidak ditemukan"));
 
-        BigDecimal amount = Optional.ofNullable(request.getUnitPrice())
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .map(a -> {
-                    try {
-                        return new BigDecimal(a);
-                    } catch (NumberFormatException e) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                "Nominal pembayaran tidak valid");
-                    }
-                })
-                .filter(a -> a.compareTo(BigDecimal.ZERO) > 0)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Nominal pembayaran harus lebih dari Rp. 0"));
+		boolean paymentNameChanged = !detail.getName().equals(request.getName());
+		boolean isPaymentAlreadyExists = repository.existsByPaymentCategoryAndClassroomAndName(category,
+				classroom,
+				request.getName());
+		if (paymentNameChanged && isPaymentAlreadyExists) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pembayaran sudah ada");
+		}
 
-        // check if unit price changed and has a payments
-        if (!detail.getUnitPrice().equals(amount) && !detail.getPayments().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Tidak dapat mengubah harga pembayaran karena sudah ada pembayaran masuk");
-        }
+		BigDecimal amount = Optional.ofNullable(request.getUnitPrice())
+				.map(String::trim)
+				.filter(s -> !s.isEmpty())
+				.map(a -> {
+					try {
+						return new BigDecimal(a);
+					} catch (NumberFormatException e) {
+						throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+								"Nominal pembayaran tidak valid");
+					}
+				})
+				.filter(a -> a.compareTo(BigDecimal.ZERO) > 0)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+						"Nominal pembayaran harus lebih dari Rp. 0"));
 
-        detail.setName(request.getName());
-        detail.setUnitPrice(amount);
+		// check if unit price changed and has a payments
+		if (!detail.getUnitPrice().equals(amount) && !detail.getPaymentItems().isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					"Tidak dapat mengubah harga pembayaran karena sudah ada pembayaran masuk");
+		}
 
-        return getPaymentDetailResponse(repository.save(detail));
-    }
+		detail.setName(request.getName());
+		detail.setUnitPrice(amount);
 
-    @Override
-    public void delete(String categoryAndClassroomAndPaymentName) {
-        String[] keyword = categoryAndClassroomAndPaymentName.split("-");
+		return getPaymentDetailResponse(repository.save(detail));
+	}
 
-        PaymentCategory category = categoryService.findByName(keyword[0])
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Kategori pembayaran tidak ditemukan"));
+	@Override
+	public void delete(String categoryAndClassroomAndPaymentName) {
+		String[] keyword = categoryAndClassroomAndPaymentName.split("-");
 
-        Classroom classroom = classroomRepository.findByCode(keyword[1]).orElse(null);
+		PaymentCategory category = categoryService.findByName(keyword[0])
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+						"Kategori pembayaran tidak ditemukan"));
 
-        PaymentDetail detail = repository.findByPaymentCategoryAndClassroomAndName(category, classroom, keyword[2])
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Pembayaran tidak ditemukan"));
+		Classroom classroom = classroomRepository.findByCode(keyword[1]).orElse(null);
 
-        if (!detail.getPayments().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Tidak dapat menghapus pembayaran karena sudah ada pembayaran masuk");
-        }
+		PaymentDetail detail = repository
+				.findByPaymentCategoryAndClassroomAndName(category, classroom, keyword[2])
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+						"Pembayaran tidak ditemukan"));
 
-        repository.delete(detail);
-    }
+		if (!detail.getPaymentItems().isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					"Tidak dapat menghapus pembayaran karena sudah ada pembayaran masuk");
+		}
 
-    private PaymentDetailResponse getPaymentDetailResponse(PaymentDetail paymentDetail) {
+		repository.delete(detail);
+	}
 
-        String classroomCode = Optional.ofNullable(paymentDetail.getClassroom())
-                .map(Classroom::getCode)
-                .orElse("Regular");
+	private PaymentDetailResponse getPaymentDetailResponse(PaymentDetail paymentDetail) {
 
-        return PaymentDetailResponse.builder()
-                .categoryName(paymentDetail.getPaymentCategory().getName())
-                .paymentName(paymentDetail.getName())
-                .classroomCode(classroomCode)
-                .unitPrice(paymentDetail.getUnitPrice()
-                        .stripTrailingZeros()
-                        .toPlainString())
-                .build();
-    }
+		String classroomCode = Optional.ofNullable(paymentDetail.getClassroom())
+				.map(Classroom::getCode)
+				.orElse("Regular");
+
+		return PaymentDetailResponse.builder()
+				.categoryName(paymentDetail.getPaymentCategory().getName())
+				.paymentName(paymentDetail.getName())
+				.classroomCode(classroomCode)
+				.unitPrice(paymentDetail.getUnitPrice()
+						.stripTrailingZeros()
+						.toPlainString())
+				.build();
+	}
+
+	@Override
+	public List<PaymentDetailBillResponse> getUnpaidPayments(String studentId) {
+		Student student = studentService.findByStudentId(studentId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+						"Siswa tidak ditemukan"));
+
+		Classroom classroom = student.getSection().getClassroom();
+		return repository.findUnpaidBillByStudent(student, classroom);
+	}
+
+	@Override
+	public List<StudentUnpaidResponse> getStudentsTotalUnpaid() {
+		return repository.findStudentsTotalUnpaid();
+	}
 
 }

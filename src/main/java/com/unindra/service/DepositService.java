@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.unindra.entity.Student;
 import com.unindra.model.request.DepositRequest;
+import com.unindra.model.response.DepositHistoryResponse;
 import com.unindra.model.response.StudentDepositResponse;
 import com.unindra.model.response.StudentDepositsHistory;
 import com.unindra.model.util.TransactionType;
@@ -26,5 +27,5 @@ public interface DepositService {
 
     List<StudentDepositsHistory> getStudentDepositHistory(String studentId);
 
-    
+    List<DepositHistoryResponse> getAllHistory();
 }

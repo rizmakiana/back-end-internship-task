@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unindra.model.request.DepositRequest;
+import com.unindra.model.response.DepositHistoryResponse;
 import com.unindra.model.response.StudentDepositResponse;
 import com.unindra.model.response.StudentDepositsHistory;
 import com.unindra.model.response.WebResponse;
@@ -81,6 +82,15 @@ public class DepositController {
 		return ResponseEntity.ok(
 				WebResponse.<String>builder()
 						.data(service.generateReferenceNumber(type))
+						.build());
+	}
+
+	@PreAuthorize("hasRole('STAFF')")
+	@GetMapping(path = "/staff/deposits/history")
+	public ResponseEntity<WebResponse<List<DepositHistoryResponse>>> getDepositsHisory() {
+		return ResponseEntity.ok(
+				WebResponse.<List<DepositHistoryResponse>>builder()
+						.data(service.getAllHistory())
 						.build());
 	}
 
