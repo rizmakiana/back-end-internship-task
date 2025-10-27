@@ -34,7 +34,7 @@ public class Payment {
     private LocalDateTime date;
 
     @Column(precision = 12, scale = 0)
-    private BigDecimal total;
+    private BigDecimal total; // sum of total amount of payment-detail
 
     @ManyToOne
     @JoinColumn(name = "student_id")

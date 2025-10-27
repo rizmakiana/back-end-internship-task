@@ -193,4 +193,15 @@ public class PaymentDetailServiceImpl implements PaymentDetailService {
 		return repository.findStudentsTotalUnpaid();
 	}
 
+	@Override
+	public Optional<PaymentDetail> getByCategoryNameAndPaymentNameAndClassroom(String categoryName, String name,
+			Classroom classroom) {
+		return repository.findByCategoryNameAndPaymentNameAndClassroom(categoryName, name, classroom);
+	}
+
+	@Override
+	public Optional<PaymentDetail> getByCategoryNameAndPaymentNameAndClassroomIsNull(String categoryName, String name) {
+		return repository.findByCategoryNameAndPaymentNameAndClassroomIsNull(categoryName, name);
+	}
+
 }

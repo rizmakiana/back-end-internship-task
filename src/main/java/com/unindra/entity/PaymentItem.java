@@ -1,7 +1,5 @@
 package com.unindra.entity;
 
-import java.math.BigDecimal;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,9 +23,6 @@ public class PaymentItem {
     
     @Id @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-
-    @Column(precision = 12, scale = 0)
-    private BigDecimal amount;
 
     @Column(nullable = true)
     private String note;

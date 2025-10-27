@@ -8,4 +8,6 @@ import com.unindra.entity.Payment;
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, String>{
 
+    boolean existsByReferenceNumber(String referenceNumber);
+
 }

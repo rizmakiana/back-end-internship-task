@@ -63,4 +63,27 @@ public interface PaymentDetailRepository extends JpaRepository<PaymentDetail, St
             """)
     List<StudentUnpaidResponse> findStudentsTotalUnpaid();
 
+    @Query("""
+        SELECT pd FROM PaymentDetail pd
+        WHERE pd.paymentCategory.name = :categoryName
+          AND pd.name = :paymentName
+          AND pd.classroom = :classroom
+    """)
+    Optional<PaymentDetail> findByCategoryNameAndPaymentNameAndClassroom(
+            @Param("categoryName") String categoryName,
+            @Param("name") String name,
+            @Param("classroom") Classroom classroom
+    );
+
+    @Query("""
+        SELECT pd FROM PaymentDetail pd
+        WHERE pd.paymentCategory.name = :categoryName
+          AND pd.name = :paymentName
+          AND pd.classroom IS NULL
+    """)
+    Optional<PaymentDetail> findByCategoryNameAndPaymentNameAndClassroomIsNull(
+            @Param("categoryName") String categoryName,
+            @Param("name") String name
+    );
+
 }

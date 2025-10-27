@@ -1,7 +1,10 @@
 package com.unindra.service;
 
 import java.util.List;
+import java.util.Optional;
 
+import com.unindra.entity.Classroom;
+import com.unindra.entity.PaymentDetail;
 import com.unindra.model.request.PaymentDetailRequest;
 import com.unindra.model.request.PaymentDetailUpdate;
 import com.unindra.model.response.PaymentDetailBillResponse;
@@ -21,5 +24,10 @@ public interface PaymentDetailService {
     List<PaymentDetailBillResponse> getUnpaidPayments(String studentId);
 
     List<StudentUnpaidResponse> getStudentsTotalUnpaid();
+
+    Optional<PaymentDetail> getByCategoryNameAndPaymentNameAndClassroom(String categoryName, String name,
+			Classroom classroom);
+
+    Optional<PaymentDetail> getByCategoryNameAndPaymentNameAndClassroomIsNull(String categoryName, String name);
     
 }
