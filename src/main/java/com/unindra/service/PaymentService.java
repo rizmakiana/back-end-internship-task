@@ -12,7 +12,7 @@ public interface PaymentService {
 
     List<PaymentHistoryResponse> getAll();
 
-    PaymentHistoryResponse add(PaymentRequest request);
+    PaymentHistoryResponse add(String studentId, PaymentRequest request);
 
     PaymentItemDetail get(String referenceNumber);
 

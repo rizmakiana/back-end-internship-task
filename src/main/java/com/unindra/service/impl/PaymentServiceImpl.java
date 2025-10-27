@@ -43,7 +43,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public String generateReferenceNumber() {
 
-        return String.format("S/TRX/%04d", String.valueOf(repository.count() + 1));
+        return String.format("S/TRX/%04d", repository.count() + 1);
 
     }
 
@@ -61,14 +61,14 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public PaymentHistoryResponse add(PaymentRequest request) {
+    public PaymentHistoryResponse add(String studentId, PaymentRequest request) {
         validationService.validate(request);
 
         if (repository.existsByReferenceNumber(request.getReferenceNumber())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Reference number sudah digunakan");
         }
 
-        Student student = studentService.findByStudentId(request.getStudentId())
+        Student student = studentService.findByStudentId(studentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Siswa tidak ditemukan"));
 
         Classroom classroom = student.getSection().getClassroom();
@@ -76,40 +76,41 @@ public class PaymentServiceImpl implements PaymentService {
         List<PaymentItem> items = new ArrayList<>();
 
         for (PaymentDetailBillResponse bill : request.getPayments()) {
-            // Cari PaymentDetail berdasarkan category name, payment name, dan classroom
+            // Cari PaymentDetail (prioritaskan yang sesuai classroom, kalau gak ada
+            // fallback ke null classroom)
             PaymentDetail paymentDetail = paymentDetailService
-                    .getByCategoryNameAndPaymentNameAndClassroom(bill.getPaymentCategory(), bill.getName(),
-                            classroom)
+                    .getByCategoryNameAndPaymentNameAndClassroom(bill.getPaymentCategory(), bill.getName(), classroom)
                     .orElseGet(() -> paymentDetailService
                             .getByCategoryNameAndPaymentNameAndClassroomIsNull(bill.getPaymentCategory(),
                                     bill.getName())
                             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                                     "Payment detail tidak ditemukan: " + bill.getName())));
 
-            // Bikin PaymentItem
             PaymentItem item = new PaymentItem();
             item.setPaymentDetail(paymentDetail);
-
             items.add(item);
         }
 
-        // 4️⃣ Buat Payment baru
+        BigDecimal totalPayment = BigDecimal.ZERO;
+        for (PaymentItem item : items) {
+            totalPayment = totalPayment.add(item.getPaymentDetail().getUnitPrice());
+        }
+
+        if (totalPayment.compareTo(request.getAmount()) != 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Nominal pembayaran tidak sesuai dengan total tagihan");
+        }
+
         Payment payment = new Payment();
         payment.setReferenceNumber(request.getReferenceNumber());
         payment.setStudent(student);
         payment.setDate(LocalDateTime.now());
-        payment.setPaymentItems(items);
-
-        BigDecimal totalPayment = BigDecimal.ZERO;
+        payment.setTotal(totalPayment);
 
         for (PaymentItem item : items) {
             item.setPayment(payment);
-            totalPayment.add(item.getPaymentDetail().getUnitPrice());
         }
-
-        if (totalPayment.compareTo(request.getAmount()) != 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BAD REQUEST. CALL DEVELOPER NOW");
-        }
+        payment.setPaymentItems(items);
 
         repository.save(payment);
 
@@ -117,7 +118,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .referenceNumber(payment.getReferenceNumber())
                 .studentName(student.getName())
                 .date(payment.getDate().format(TimeFormat.formatter2))
-                .totalAmount(request.getAmount())
+                .totalAmount(totalPayment)
                 .build();
     }
 

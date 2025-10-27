@@ -12,9 +12,6 @@ import lombok.Data;
 public class PaymentRequest {
 
     @NotBlank
-    private String studentId;
-
-    @NotBlank
     private String referenceNumber;
 
     @NotNull

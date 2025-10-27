@@ -66,7 +66,7 @@ public interface PaymentDetailRepository extends JpaRepository<PaymentDetail, St
     @Query("""
         SELECT pd FROM PaymentDetail pd
         WHERE pd.paymentCategory.name = :categoryName
-          AND pd.name = :paymentName
+          AND pd.name = :name
           AND pd.classroom = :classroom
     """)
     Optional<PaymentDetail> findByCategoryNameAndPaymentNameAndClassroom(
@@ -78,7 +78,7 @@ public interface PaymentDetailRepository extends JpaRepository<PaymentDetail, St
     @Query("""
         SELECT pd FROM PaymentDetail pd
         WHERE pd.paymentCategory.name = :categoryName
-          AND pd.name = :paymentName
+          AND pd.name = :name
           AND pd.classroom IS NULL
     """)
     Optional<PaymentDetail> findByCategoryNameAndPaymentNameAndClassroomIsNull(
