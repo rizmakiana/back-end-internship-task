@@ -9,26 +9,33 @@ import com.unindra.model.response.PaymentItemDetail;
 import com.unindra.model.response.PaymentRequest;
 import com.unindra.repository.PaymentRepository;
 import com.unindra.service.PaymentService;
+import com.unindra.util.TimeFormat;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class PaymentServiceImpl implements PaymentService{
+public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository repository;
 
     @Override
     public String generateReferenceNumber() {
-        
+
         return String.format("S/TRX/%04d", String.valueOf(repository.count() + 1));
 
     }
 
     @Override
     public List<PaymentHistoryResponse> getAll() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAll'");
+        return repository.findAll().stream()
+                .map(payment -> PaymentHistoryResponse.builder()
+                        .referenceNumber(payment.getReferenceNumber())
+                        .studentName(payment.getStudent().getName())
+                        .date(payment.getDate().format(TimeFormat.formatter2))
+                        .totalAmount(payment.getTotal())
+                        .build())
+                .toList();
     }
 
     @Override
@@ -42,5 +49,5 @@ public class PaymentServiceImpl implements PaymentService{
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'get'");
     }
-    
+
 }
