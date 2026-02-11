@@ -1,0 +1,56 @@
+[
+  {
+    "classroom_code": "AP10A",
+    "department_name":"Administrasi Perkantoran",
+    "classroom_grade": 10,
+    "classroom_name": "A"
+  },
+  {
+    "classroom_code": "AP10B",
+    "department_name":"Administrasi Perkantoran",
+    "classroom_grade": 10,
+    "classroom_name": "B"
+  },
+  {
+    "classroom_code": "AP10C",
+    "department_name":"Administrasi Perkantoran",
+    "classroom_grade": 10,
+    "classroom_name": "C"
+  },
+  {
+    "classroom_code": "AP11A",
+    "department_name":"Administrasi Perkantoran",
+    "classroom_grade": 11,
+    "classroom_name": "A"
+  },
+  {
+    "classroom_code": "AP11B",
+    "department_name":"Administrasi Perkantoran",
+    "classroom_grade": 11,
+    "classroom_name": "B"
+  },
+  {
+    "classroom_code": "AP11C",
+    "department_name":"Administrasi Perkantoran",
+    "classroom_grade": 11,
+    "classroom_name": "C"
+  },
+  {
+    "classroom_code": "AP12A",
+    "department_name":"Administrasi Perkantoran",
+    "classroom_grade": 12,
+    "classroom_name": "A"
+  },
+  {
+    "classroom_code": "AP12B",
+    "department_name":"Administrasi Perkantoran",
+    "classroom_grade": 12,
+    "classroom_name": "B"
+  },
+  {
+    "classroom_code": "AP12C",
+    "department_name":"Administrasi Perkantoran",
+    "classroom_grade": 12,
+    "classroom_name": "C"
+  }
+]

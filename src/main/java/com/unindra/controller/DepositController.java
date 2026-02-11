@@ -2,6 +2,8 @@ package com.unindra.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -92,6 +94,18 @@ public class DepositController {
 				WebResponse.<List<DepositHistoryResponse>>builder()
 						.data(service.getAllHistory())
 						.build());
+	}
+
+	@PreAuthorize("hasRole('STAFF')")
+	@GetMapping(path = "/report/deposit/{studentId}")
+	public ResponseEntity<byte[]> getDepositReport(@PathVariable("studentId") String studentId) {
+		// Service bakal narik data deposit dari DB berdasarkan studentId
+		byte[] pdfBytes = service.generateStudentPdf(studentId);
+
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE)
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"deposit_" + studentId + ".pdf\"")
+				.body(pdfBytes);
 	}
 
 }

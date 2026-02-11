@@ -1,0 +1,88 @@
+{
+  "nama": "Julian Bagas",
+  "nis": "20250001",
+  "kelas": "AP10A",
+  "totalDeposit": "110.171.101",
+  "totalWithdrawal": "9.151.010",
+  "currentDeposit": "101.020.091",
+  "transaksi": [
+    {
+      "tanggal": "2026-10-22",
+      "no_transaksi": "S/DEPOSIT-0004",
+      "deposit": "20.000",
+      "penarikan": "-"
+    },
+    {
+      "tanggal": "2026-10-23",
+      "no_transaksi": "S/WITHDRAW-0002",
+      "deposit": "-",
+      "penarikan": "50.000"
+    },
+    {
+      "tanggal": "2026-10-24",
+      "no_transaksi": "S/DEPOSIT-0013",
+      "deposit": "1.000",
+      "penarikan": "-"
+    },
+    {
+      "tanggal": "2026-10-24",
+      "no_transaksi": "S/WITHDRAW-0007",
+      "deposit": "-",
+      "penarikan": "100.000"
+    },
+    {
+      "tanggal": "2026-10-23",
+      "no_transaksi": "S/WITHDRAW-0001",
+      "deposit": "-",
+      "penarikan": "10.000"
+    },
+    {
+      "tanggal": "2026-10-22",
+      "no_transaksi": "S/DEPOSIT-0003",
+      "deposit": 50000,
+      "penarikan": "-"
+    },
+    {
+      "tanggal": "2026-10-24",
+      "no_transaksi": "S/DEPOSIT-0015",
+      "deposit": 1,
+      "penarikan": "-"
+    },
+    {
+      "tanggal": "2026-10-24",
+      "no_transaksi": "S/DEPOSIT-0014",
+      "deposit": 100,
+      "penarikan": "-"
+    },
+    {
+      "tanggal": "2026-10-24",
+      "no_transaksi": "S/WITHDRAW-0006",
+      "deposit": "-",
+      "penarikan": "9.000.000"
+    },
+    {
+      "tanggal": "2026-10-24",
+      "no_transaksi": "S/DEPOSIT-0012",
+      "deposit": "10.000.000",
+      "penarikan": "-"
+    },
+    {
+      "tanggal": "2026-10-22",
+      "no_transaksi": "S/DEPOSIT-0001",
+      "deposit": "100.000",
+      "penarikan": "-"
+    },
+    {
+      "tanggal": "2026-10-24",
+      "no_transaksi": "S/WITHDRAW-0008",
+      "deposit": "-",
+      "penarikan": "1.000"
+    },
+    {
+      "tanggal": "2026-10-24",
+      "no_transaksi": "S/DEPOSIT-0011",
+      "deposit": "100.000.000",
+      "penarikan": "-"
+    }
+  ]
+}

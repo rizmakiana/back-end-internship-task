@@ -28,4 +28,6 @@ public interface DepositService {
     List<StudentDepositsHistory> getStudentDepositHistory(String studentId);
 
     List<DepositHistoryResponse> getAllHistory();
+
+    byte[] generateStudentPdf(String studentId);
 }

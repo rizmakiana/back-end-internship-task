@@ -1,5 +1,6 @@
 package com.unindra.service.impl;
 
+import java.math.BigDecimal;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.Year;
@@ -191,11 +192,12 @@ public class StudentServiceImpl implements StudentService {
     public void delete(String studentId) {
         Student student = repository.findByStudentId(studentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Siswa tidak ditemukan"));
-
+        // revisi jir ini salah logic -> harusnya hitung dulu total tabungan masuk - total tabungan keluar
         if (!student.getDeposits().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Siswa masih memiliki tabungan. Harap tarik semua tabungan terlebih dahulu");
         }
+        // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Fitur belum tersedia");
 
         repository.delete(student);
     }
